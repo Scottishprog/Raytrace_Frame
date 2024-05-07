@@ -13,24 +13,22 @@ class Window:
 
         def calculate(*args):
             pass
-
-        feet = StringVar()
-        feet_entry = ttk.Entry(self.main_frame, width = 7, textvariable=feet)
-        feet_entry.grid(column=2, row = 1, sticky=(W, E))
+        self.canvas = Canvas(self.main_frame, bg='white', width=width, height=height-200)
+        self.canvas.grid(column=1, row = 1, columnspan=3, sticky=(N, E))
 
         meters = StringVar()
         ttk.Label(self.main_frame, textvariable=meters).grid(column=2, row = 2, sticky=(W, E))
 
         ttk.Button(self.main_frame, text="Calculate", command = calculate).grid(column=3, row=3, sticky=W)
 
-        ttk.Label(self.main_frame, text="feet").grid(column = 3, row = 1, sticky = W)
+
+
         ttk.Label(self.main_frame, text="is equivalent to").grid(column=1, row=2, sticky=E)
         ttk.Label(self.main_frame, text="meters").grid(column=3, row=2, sticky=W)
 
         for child in self.main_frame.winfo_children():
             child.grid_configure(padx=5, pady=5)
 
-        feet_entry.focus()
 
         #self.canvas = Canvas(self.__root, bg='black', width=width, height=height)
         #self.canvas.pack(fill=BOTH, expand=True)
