@@ -19,18 +19,23 @@ class Window:
         x_spinbox = ttk.Spinbox(self.main_frame, from_=200, to=2000, increment=50, width=8,
                                 textvariable=self.canvas_x_val)
         x_spinbox.grid(column=2, row=2, sticky=W)
-        self.canvas_x_val.set(f"{height}")
+        self.canvas_x_val.set(f"{width}")
 
         self.canvas_y_val = StringVar()
         y_spinbox = ttk.Spinbox(self.main_frame, from_=200, to=2000, increment=50, width=8,
                                 textvariable=self.canvas_y_val)
         y_spinbox.grid(column=4, row=2, sticky=W)
-        self.canvas_y_val.set(f"{width}")
+        self.canvas_y_val.set(f"{height}")
 
-        ttk.Label(self.main_frame, text="Vertical size: ").grid(column=1, row=2, sticky=E)
-        ttk.Label(self.main_frame, text="Horizontal size: ").grid(column=3, row=2, sticky=E)
+        ttk.Label(self.main_frame, text="Horizontal size: ").grid(column=1, row=2, sticky=E)
+        ttk.Label(self.main_frame, text="Vertical size: ").grid(column=3, row=2, sticky=E)
+
+        ttk.Button(self.main_frame, text="Render", command=self.start_raytrace).grid(column=5, row=2)
 
         for child in self.main_frame.winfo_children():
             child.grid_configure(padx=5, pady=5)
+
+    def start_raytrace(self):
+        self.canvas.config(width=self.canvas_x_val.get(), height=self.canvas_y_val.get())
 
 
