@@ -6,45 +6,31 @@ class Window:
     def __init__(self, root, width=800, height=600, title='Raytracing Frame'):
         self.__root = root
         self.__root.title(title)
-        self.main_frame = ttk.Frame(self.__root, padding="3 3 12 12")
+        self.main_frame = ttk.Frame(self.__root, padding="3 3 3 12")
         self.main_frame.grid(row=0, column=0, sticky=(N, S, E, W))
         self.__root.columnconfigure(0, weight=1)
         self.__root.rowconfigure(0, weight=1)
 
-        def calculate(*args):
-            pass
-        self.canvas = Canvas(self.main_frame, bg='white', width=width, height=height-200)
-        self.canvas.grid(column=1, row = 1, columnspan=3, sticky=(N, E))
+        # Elements to be inserted into the main grid
+        self.canvas = Canvas(self.main_frame, bg='white', width=width, height=height)
+        self.canvas.grid(column=1, row=1, columnspan=4, sticky=N)
 
-        meters = StringVar()
-        ttk.Label(self.main_frame, textvariable=meters).grid(column=2, row = 2, sticky=(W, E))
+        self.canvas_x_val = StringVar()
+        x_spinbox = ttk.Spinbox(self.main_frame, from_=200, to=2000, increment=50, width=8,
+                                textvariable=self.canvas_x_val)
+        x_spinbox.grid(column=2, row=2, sticky=W)
+        self.canvas_x_val.set(f"{height}")
 
-        ttk.Button(self.main_frame, text="Calculate", command = calculate).grid(column=3, row=3, sticky=W)
+        self.canvas_y_val = StringVar()
+        y_spinbox = ttk.Spinbox(self.main_frame, from_=200, to=2000, increment=50, width=8,
+                                textvariable=self.canvas_y_val)
+        y_spinbox.grid(column=4, row=2, sticky=W)
+        self.canvas_y_val.set(f"{width}")
 
-
-
-        ttk.Label(self.main_frame, text="is equivalent to").grid(column=1, row=2, sticky=E)
-        ttk.Label(self.main_frame, text="meters").grid(column=3, row=2, sticky=W)
+        ttk.Label(self.main_frame, text="Vertical size: ").grid(column=1, row=2, sticky=E)
+        ttk.Label(self.main_frame, text="Horizontal size: ").grid(column=3, row=2, sticky=E)
 
         for child in self.main_frame.winfo_children():
             child.grid_configure(padx=5, pady=5)
 
-
-        #self.canvas = Canvas(self.__root, bg='black', width=width, height=height)
-        #self.canvas.pack(fill=BOTH, expand=True)
-        self.__is_running = False
-        self.__root.protocol("WM_DELETE_WINDOW", self.close)
-
-    def redraw(self):
-        self.__root.update_idletasks()
-        self.__root.update()
-
-    def wait_for_close(self):
-        self.__is_running = True
-        while self.__is_running:
-            self.redraw()
-        print('Window has been closed')
-
-    def close(self):
-        self.__is_running = False
 
