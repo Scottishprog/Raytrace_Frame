@@ -1,11 +1,22 @@
 from tkinter import *
 from tkinter import ttk
+import queue
+import threading
+
+from src.ray_trace_thread import RayTraceThread
 
 
 class Window:
     def __init__(self, root, width=800, height=600, title='Raytracing Frame'):
         self.__root = root
         self.__root.title(title)
+
+        # Set up Message Queue to Ray_Trace_Thread
+        self.message_queue = queue.Queue()
+        self.message_event = '<<rtt_message>>'
+        self.__root.bind(self.message_event, self.process_message_queue)
+
+        # Set up Main Grid
         self.main_frame = ttk.Frame(self.__root, padding="3 3 3 12")
         self.main_frame.grid(row=0, column=0, sticky=(N, S, E, W))
         self.__root.columnconfigure(0, weight=1)
@@ -38,4 +49,12 @@ class Window:
     def start_raytrace(self):
         self.canvas.config(width=self.canvas_x_val.get(), height=self.canvas_y_val.get())
 
+    def send_message_to_ui(self, message):
+        self.message_queue.put(message)
+        self.__root.event_generate(self.message_event, when='tail')
+
+    def process_message_queue(self, event):
+        while self.message_queue.empty() is False:
+            message = self.message_queue.get(block=False)
+            pass # need to add functionality here...
 
