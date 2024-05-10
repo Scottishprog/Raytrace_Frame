@@ -3,7 +3,7 @@ from tkinter import ttk
 import queue
 import threading
 
-from src.ray_trace_thread import RayTraceThread
+from ray_trace_thread import RayTraceThread
 
 
 class Window:
@@ -11,10 +11,13 @@ class Window:
         self.__root = root
         self.__root.title(title)
 
-        # Set up Message Queue to Ray_Trace_Thread
-        self.message_queue = queue.Queue()
-        self.message_event = '<<rtt_message>>'
-        self.__root.bind(self.message_event, self.process_message_queue)
+        # Set up Message Queues to Ray_Trace_Thread
+        self.from_ui_message_queue = queue.Queue()
+        self.to_ui_message_queue = queue.Queue()
+        self.to_ui_message_event = '<<to_ui_message>>'
+        self.to_ui_array_event = '<<to_ui_array>>'
+        self.__root.bind(self.to_ui_message_event, self.process_message)
+        self.__root.bind(self.to_ui_array_event, self.process_array)
 
         # Set up Main Grid
         self.main_frame = ttk.Frame(self.__root, padding="3 3 3 12")
@@ -40,6 +43,8 @@ class Window:
 
         ttk.Label(self.main_frame, text="Horizontal size: ").grid(column=1, row=2, sticky=E)
         ttk.Label(self.main_frame, text="Vertical size: ").grid(column=3, row=2, sticky=E)
+        self.log_label = StringVar()
+        ttk.Label(self.main_frame, textvariable=self.log_label).grid(column=5, row=3)
 
         ttk.Button(self.main_frame, text="Render", command=self.start_raytrace).grid(column=5, row=2)
 
@@ -48,13 +53,19 @@ class Window:
 
     def start_raytrace(self):
         self.canvas.config(width=self.canvas_x_val.get(), height=self.canvas_y_val.get())
+        self.from_ui_message_queue.put('Test Phrase')
+        # TODO add additional code to actually do raytracing.
 
     def send_message_to_ui(self, message):
-        self.message_queue.put(message)
-        self.__root.event_generate(self.message_event, when='tail')
+        self.to_ui_message_queue.put(message)
+        self.__root.event_generate(self.to_ui_message_event, when='tail')
 
-    def process_message_queue(self, event):
-        while self.message_queue.empty() is False:
-            message = self.message_queue.get(block=False)
-            pass # need to add functionality here...
+    def process_message(self, event):
+        while self.to_ui_message_queue.empty() is False:
+            message = self.to_ui_message_queue.get(block=False)
+            self.log_label.set(message)
+            self.to_ui_message_queue.task_done()
 
+    def process_array(self, event):
+        pass
+        # TODO This takes the array from the raytrace thread, and pushes it to the canvas
