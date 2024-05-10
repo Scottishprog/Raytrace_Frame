@@ -1,15 +1,18 @@
 from tkinter import *
 from tkinter import ttk
 import queue
-import threading
-
-from ray_trace_thread import RayTraceThread
+import numpy as np
+from messages import from_ui_message
 
 
 class Window:
     def __init__(self, root, width=800, height=600, title='Raytracing Frame'):
         self.__root = root
         self.__root.title(title)
+        self.__width = width
+        self.__height = height
+        self.__array = None
+        self.__image = None
 
         # Set up Message Queues to Ray_Trace_Thread
         self.from_ui_message_queue = queue.Queue()
@@ -53,19 +56,36 @@ class Window:
 
     def start_raytrace(self):
         self.canvas.config(width=self.canvas_x_val.get(), height=self.canvas_y_val.get())
-        self.from_ui_message_queue.put('Test Phrase')
+        start_message = from_ui_message(self.__height, self.__width, True)
+        self.from_ui_message_queue.put(start_message)
         # TODO add additional code to actually do raytracing.
 
     def send_message_to_ui(self, message):
         self.to_ui_message_queue.put(message)
         self.__root.event_generate(self.to_ui_message_event, when='tail')
 
+    def send_array_to_ui(self, array):
+        self.to_ui_message_queue.put(array)
+        self.__root.event_generate(self.to_ui_array_event, when='tail')
+
     def process_message(self, event):
-        while self.to_ui_message_queue.empty() is False:
-            message = self.to_ui_message_queue.get(block=False)
-            self.log_label.set(message)
-            self.to_ui_message_queue.task_done()
+        message = self.to_ui_message_queue.get(block=False)
+        self.to_ui_message_queue.task_done()
+        self.log_label.set(message)
+        self.to_ui_message_queue.task_done()
 
     def process_array(self, event):
-        pass
-        # TODO This takes the array from the raytrace thread, and pushes it to the canvas
+        # Pull the array from the queue
+        self.__array = self.to_ui_message_queue.get(block=False)
+        self.to_ui_message_queue.task_done()
+
+        # Convert the array to PPM format image, so it can be sent to the canvas
+        ppm_header = f'P6 {self.__width} {self.__height} 255 '.encode()
+        data = ppm_header + self.__array.astype(np.uint8).tobytes()
+        self.__image = PhotoImage(width=self.__width, height=self.__height, data=data, format='PPM')
+
+        # Update Canvas
+        self.canvas.delete('all')
+        self.canvas.create_image(0, 0, anchor=NW, image=self.__image)
+
+
