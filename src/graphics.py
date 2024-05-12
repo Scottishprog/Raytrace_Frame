@@ -72,7 +72,6 @@ class Window:
         message = self.to_ui_message_queue.get(block=False)
         self.to_ui_message_queue.task_done()
         self.log_label.set(message)
-        self.to_ui_message_queue.task_done()
 
     def process_array(self, event):
         # Pull the array from the queue
