@@ -3,6 +3,7 @@ from tkinter import ttk
 import queue
 import numpy as np
 from messages import FromUiMessage
+from ray_trace_thread import RayTraceThread
 
 
 class Window:
@@ -74,10 +75,11 @@ class Window:
             child.grid_configure(padx=5, pady=5)
 
     def on_exit(self):
-        stop_thread()
+        # TODO Add means of killing a running thread if needed.
         self.__root.destroy()
 
     def start_raytrace(self):
+        ray_trace_thread = RayTraceThread(self)
         self.canvas.config(width=self.canvas_x_val.get(), height=self.canvas_y_val.get())
         start_message = FromUiMessage(self.__height, self.__width, True)
         self.from_ui_message_queue.put(start_message)

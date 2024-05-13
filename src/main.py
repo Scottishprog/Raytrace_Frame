@@ -5,8 +5,9 @@ from ray_trace_thread import RayTraceThread
 
 def main():
     root = Tk()
+
     win = Window(root, 800, 600)
-    ray_trace_thread = RayTraceThread(win)
+    #ray_trace_thread = RayTraceThread(win)
 
     root.mainloop()
 
