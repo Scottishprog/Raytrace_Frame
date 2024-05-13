@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import ttk
 import queue
 import numpy as np
-from messages import from_ui_message
+from messages import FromUiMessage
 
 
 class Window:
@@ -13,6 +13,7 @@ class Window:
         self.__height = height
         self.__array = None
         self.__image = None
+        self.__root.protocol("WM_DELETE_WINDOW", self.on_exit)
 
         # Set up Message Queues to Ray_Trace_Thread
         self.from_ui_message_queue = queue.Queue()
@@ -51,14 +52,35 @@ class Window:
 
         ttk.Button(self.main_frame, text="Render", command=self.start_raytrace).grid(column=5, row=2)
 
+        self.tv_frame = ttk.Frame(self.main_frame)
+        self.tv_frame.grid(column=5, row=1, sticky=(N,E))
+        self.tv = ttk.Treeview(self.tv_frame, columns=('1', '2'), height=29, selectmode='browse')
+        self.tv.grid(column=1, row=1, sticky=E)
+
+        self.tv.heading(1, text='Chapter')
+        self.tv.heading(2, text='ID')
+        self.tv.column(1, width=75, anchor='center')
+        self.tv.column(2, width=100)
+
+        self.tv.insert('', 'end', text="Graphical Hello World", values=("2.2 hello_world"))
+        # TODO add a function for this, so the expanding list doesn't obscure thing even worse.
+
+        self.sb = Scrollbar(self.tv_frame)
+        self.sb.grid(column=2, row=1, sticky=(N, W, S))
+
+
+        # Polishing and presentation
         for child in self.main_frame.winfo_children():
             child.grid_configure(padx=5, pady=5)
 
+    def on_exit(self):
+        stop_thread()
+        self.__root.destroy()
+
     def start_raytrace(self):
         self.canvas.config(width=self.canvas_x_val.get(), height=self.canvas_y_val.get())
-        start_message = from_ui_message(self.__height, self.__width, True)
+        start_message = FromUiMessage(self.__height, self.__width, True)
         self.from_ui_message_queue.put(start_message)
-        # TODO add additional code to actually do raytracing.
 
     def send_message_to_ui(self, message):
         self.to_ui_message_queue.put(message)

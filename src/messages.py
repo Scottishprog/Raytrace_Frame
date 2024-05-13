@@ -1,4 +1,4 @@
-class from_ui_message:
+class FromUiMessage:
     def __init__(self, height, width, run):
         self.height = height
         self.width = width

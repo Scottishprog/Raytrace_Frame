@@ -4,7 +4,6 @@ import messages
 import time
 
 
-
 class RayTraceThread(threading.Thread):
     def __init__(self, parent_thread):
         super().__init__()
@@ -17,12 +16,12 @@ class RayTraceThread(threading.Thread):
         self.parent_thread.from_ui_message_queue.task_done()
         self.parent_thread.send_message_to_ui('Started!')
 
-        working_array = np.ones((start_message.height, start_message.width*3))
+        working_array = np.ones((start_message.height, start_message.width * 3))
         for i in range(0, start_message.height):
-            for j in range(0, start_message.width*3, 3):
-                working_array[i,j] = i/(start_message.height-1)
-                working_array[i,j+1] = (j//3)/(start_message.width-1)
-                working_array[i,j+2] = 0.0
+            for j in range(0, start_message.width * 3, 3):
+                working_array[i, j] = i / (start_message.height - 1)
+                working_array[i, j + 1] = (j // 3) / (start_message.width - 1)
+                working_array[i, j + 2] = 0.0
 
         working_array = (working_array * 255.99999).clip(0, 255)
 
