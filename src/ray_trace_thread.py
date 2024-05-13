@@ -16,6 +16,7 @@ class RayTraceThread(threading.Thread):
         self.parent_thread.from_ui_message_queue.task_done()
         # TODO add logic to actually look at the message run state, and act accordingly
         self.parent_thread.send_message_to_ui('Started!')
+        print(f'Height: {start_message.height}, Width: {start_message.width}')
 
         working_array = np.ones((start_message.height, start_message.width * 3))
         for i in range(0, start_message.height):

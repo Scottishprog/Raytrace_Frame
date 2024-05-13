@@ -60,8 +60,10 @@ class Window:
 
         self.tv.heading(1, text='Chapter')
         self.tv.heading(2, text='ID')
-        self.tv.column(1, width=75, anchor='center')
-        self.tv.column(2, width=100)
+        self.tv.column("#0", width=300)
+        self.tv.column(1, width=110, anchor='center')
+        self.tv.column(2, width=150)
+
 
         self.tv.insert('', 'end', text="Graphical Hello World", values=("2.2 hello_world"))
         # TODO add a function for this, so the expanding list doesn't obscure thing even worse.
@@ -81,6 +83,9 @@ class Window:
     def start_raytrace(self):
         ray_trace_thread = RayTraceThread(self)
         self.canvas.config(width=self.canvas_x_val.get(), height=self.canvas_y_val.get())
+        self.__width = int(self.canvas_x_val.get())
+        self.__height = int(self.canvas_y_val.get())
+
         start_message = FromUiMessage(self.__height, self.__width, True)
         self.from_ui_message_queue.put(start_message)
 
