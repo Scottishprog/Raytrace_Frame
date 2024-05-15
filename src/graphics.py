@@ -4,6 +4,7 @@ import queue
 import numpy as np
 from messages import FromUiMessage
 from ray_trace_thread import RayTraceThread
+from worlds import(world_list, tree_view_list)
 
 
 class Window:
@@ -64,11 +65,13 @@ class Window:
         self.tv.column(1, width=110, anchor='center')
         self.tv.column(2, width=150)
 
+        print(world_list)
+        print(tree_view_list)
 
         self.tv.insert('', 'end', text="Graphical Hello World", values=("2.2 hello_world"))
-        # TODO add a function for this, so the expanding list doesn't obscure thing even worse.
+        # TODO add a function for this, so the expanding list doesn't obscure things even worse.
 
-        self.sb = Scrollbar(self.tv_frame)
+        self.sb = ttk.Scrollbar(self.tv_frame)
         self.sb.grid(column=2, row=1, sticky=(N, W, S))
 
 
@@ -88,6 +91,7 @@ class Window:
 
         start_message = FromUiMessage(self.__height, self.__width, True)
         self.from_ui_message_queue.put(start_message)
+
 
     def send_message_to_ui(self, message):
         self.to_ui_message_queue.put(message)
