@@ -2,6 +2,7 @@ import threading
 import numpy as np
 import messages
 import time
+from worlds import(hello_world)
 
 
 class RayTraceThread(threading.Thread):
@@ -15,15 +16,11 @@ class RayTraceThread(threading.Thread):
         start_message = self.parent_thread.from_ui_message_queue.get(block=True)
         self.parent_thread.from_ui_message_queue.task_done()
         # TODO add logic to actually look at the message run state, and act accordingly
+        # TODO add to messages the ability of which world to run and act below accordingly.
         self.parent_thread.send_message_to_ui('Started!')
         print(f'Height: {start_message.height}, Width: {start_message.width}')
 
-        working_array = np.ones((start_message.height, start_message.width * 3))
-        for i in range(0, start_message.height):
-            for j in range(0, start_message.width * 3, 3):
-                working_array[i, j] = i / (start_message.height - 1)
-                working_array[i, j + 1] = (j // 3) / (start_message.width - 1)
-                working_array[i, j + 2] = 0.0
+        working_array = hello_world(start_message.height, start_message.width)
 
         # TODO during the running loop, push updates periodically, and listen for a stop command
 
