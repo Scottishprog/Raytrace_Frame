@@ -4,7 +4,7 @@ import queue
 import numpy as np
 from messages import FromUiMessage
 from ray_trace_thread import RayTraceThread
-from worlds import(world_list, tree_view_list)
+from worlds import (world_list, tree_view_list)
 
 
 class Window:
@@ -55,33 +55,35 @@ class Window:
         ttk.Button(self.main_frame, text="Render", command=self.start_raytrace).grid(column=5, row=2)
 
         self.tv_frame = ttk.Frame(self.main_frame)
-        self.tv_frame.grid(column=5, row=1, sticky=(N,E))
+        self.tv_frame.grid(column=5, row=1, sticky=(N, E))
         self.tv = ttk.Treeview(self.tv_frame, columns=('1', '2'), height=29, selectmode='browse')
         self.tv.grid(column=1, row=1, sticky=E)
 
-        self.tv.heading(1, text='Chapter')
-        self.tv.heading(2, text='ID')
-        self.tv.column("#0", width=300)
-        self.tv.column(1, width=110, anchor='center')
-        self.tv.column(2, width=150)
+        self.initialize_treeview(self.tv, tree_view_list)
 
-        print(world_list)
-        print(tree_view_list)
-
-        self.tv.insert('', 'end', text="Graphical Hello World", values=("2.2 hello_world"))
-        # TODO add a function for this, so the expanding list doesn't obscure things even worse.
+        #self.tv.insert('', 'end', text="Graphical Hello World", values=("2.2 hello_world"))
 
         self.sb = ttk.Scrollbar(self.tv_frame)
         self.sb.grid(column=2, row=1, sticky=(N, W, S))
 
-
-        # Polishing and presentation
+        # Polishing and Presentation
         for child in self.main_frame.winfo_children():
             child.grid_configure(padx=5, pady=5)
 
     def on_exit(self):
         # TODO Add means of killing a running thread if needed.
         self.__root.destroy()
+
+    def initialize_treeview(self, tv, data):
+        self.tv.heading(1, text='Chapter')
+        self.tv.heading(2, text='ID')
+        self.tv.column("#0", width=300)
+        self.tv.column(1, width=110, anchor='center')
+        self.tv.column(2, width=150)
+
+        for line in data:
+            self.tv.insert('', 'end', text=line[0], values=line[1])
+
 
     def start_raytrace(self):
         ray_trace_thread = RayTraceThread(self)
@@ -91,7 +93,6 @@ class Window:
 
         start_message = FromUiMessage(self.__height, self.__width, True)
         self.from_ui_message_queue.put(start_message)
-
 
     def send_message_to_ui(self, message):
         self.to_ui_message_queue.put(message)
@@ -119,5 +120,3 @@ class Window:
         # Update Canvas
         self.canvas.delete('all')
         self.canvas.create_image(0, 0, anchor=NW, image=self.__image)
-
-

@@ -8,7 +8,6 @@ def main():
 
     win = Window(root, 800, 600)
 
-
     root.mainloop()
 
 
