@@ -61,10 +61,7 @@ class Window:
 
         self.initialize_treeview(self.tv, tree_view_list)
 
-        #self.tv.insert('', 'end', text="Graphical Hello World", values=("2.2 hello_world"))
 
-        self.sb = ttk.Scrollbar(self.tv_frame)
-        self.sb.grid(column=2, row=1, sticky=(N, W, S))
 
         # Polishing and Presentation
         for child in self.main_frame.winfo_children():
@@ -84,14 +81,24 @@ class Window:
         for line in data:
             self.tv.insert('', 'end', text=line[0], values=line[1])
 
+        self.sb = ttk.Scrollbar(self.tv_frame, orient='vertical', command=self.tv.yview)
+        self.sb.grid(column=2, row=1, sticky=(N, W, S))
+        self.tv.configure(yscrollcommand=self.sb.set)
+
+        # Set default selection at top
+        default_id = self.tv.get_children()[0]
+        self.tv.focus(default_id)
+        self.tv.selection_set(default_id)
+
 
     def start_raytrace(self):
         ray_trace_thread = RayTraceThread(self)
         self.canvas.config(width=self.canvas_x_val.get(), height=self.canvas_y_val.get())
         self.__width = int(self.canvas_x_val.get())
         self.__height = int(self.canvas_y_val.get())
+        active_world = self.tv.item(self.tv.focus(), 'values')[1]
 
-        start_message = FromUiMessage(self.__height, self.__width, True)
+        start_message = FromUiMessage(self.__height, self.__width, True, active_world)
         self.from_ui_message_queue.put(start_message)
 
     def send_message_to_ui(self, message):

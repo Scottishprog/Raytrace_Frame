@@ -3,10 +3,12 @@ import numpy as np
 world_list = {}
 tree_view_list = []
 
+
 def add_world(function):
     world_list[function.__name__] = function
     tree_view_list.append(["Graphical Hello World", f'2.2 {function.__name__}'])
     return function
+
 
 @add_world
 def hello_world(height, width):
