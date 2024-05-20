@@ -20,7 +20,12 @@ class RayTraceThread(threading.Thread):
         self.parent_thread.send_message_to_ui('Started!')
         print(f'Height: {start_message.height}, Width: {start_message.width}, world: {start_message.world}')
 
-        working_array = world_list[start_message.world](start_message.height, start_message.width)
+        working_array = np.ones((start_message.height, start_message.width, 3))
+        print(f'Array format: {working_array.shape}')
+        working_array = world_list[start_message.world](start_message.height,
+                                                        start_message.width,
+                                                        working_array,
+                                                        self.parent_thread)
 
         # TODO during the running loop, push updates periodically, and listen for a stop command
 
