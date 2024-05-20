@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import ttk
 import queue
 import numpy as np
-from messages import FromUiMessage
+from messages import (FromUiMessage, ToUiMessage)
 from ray_trace_thread import RayTraceThread
 from worlds import (world_list, tree_view_list)
 
@@ -15,6 +15,7 @@ class Window:
         self.__height = height
         self.__array = None
         self.__image = None
+        self.__canvas_updatable = True
         self.__root.protocol("WM_DELETE_WINDOW", self.on_exit)
 
         # Set up Message Queues to Ray_Trace_Thread
@@ -59,9 +60,11 @@ class Window:
         self.tv = ttk.Treeview(self.tv_frame, columns=('1', '2'), height=29, selectmode='browse')
         self.tv.grid(column=1, row=1, sticky=E)
 
+        self.sb = ttk.Scrollbar(self.tv_frame, orient='vertical', command=self.tv.yview)
+        self.sb.grid(column=2, row=1, sticky=(N, W, S))
+        self.tv.configure(yscrollcommand=self.sb.set)
+
         self.initialize_treeview(self.tv, tree_view_list)
-
-
 
         # Polishing and Presentation
         for child in self.main_frame.winfo_children():
@@ -70,6 +73,10 @@ class Window:
     def on_exit(self):
         # TODO Add means of killing a running thread if needed.
         self.__root.destroy()
+
+    def update(self):
+        self.__canvas_updatable = True
+        self.__root.after(500, self.update())
 
     def initialize_treeview(self, tv, data):
         self.tv.heading(1, text='Chapter')
@@ -81,17 +88,14 @@ class Window:
         for line in data:
             self.tv.insert('', 'end', text=line[0], values=line[1])
 
-        self.sb = ttk.Scrollbar(self.tv_frame, orient='vertical', command=self.tv.yview)
-        self.sb.grid(column=2, row=1, sticky=(N, W, S))
-        self.tv.configure(yscrollcommand=self.sb.set)
-
         # Set default selection at top
         default_id = self.tv.get_children()[0]
         self.tv.focus(default_id)
         self.tv.selection_set(default_id)
 
-
     def start_raytrace(self):
+
+        # TODO disable the button until "stopped" message is received from thread.
         ray_trace_thread = RayTraceThread(self)
         self.canvas.config(width=self.canvas_x_val.get(), height=self.canvas_y_val.get())
         self.__width = int(self.canvas_x_val.get())
@@ -112,18 +116,21 @@ class Window:
     def process_message(self, event):
         message = self.to_ui_message_queue.get(block=False)
         self.to_ui_message_queue.task_done()
-        self.log_label.set(message)
+        if message.stopped:
+            pass
+        if message.message is not None:
+            self.log_label.set(message.message)
+        if message.array is not None:
+            self.__array = message.array
+            self.process_array()
 
-    def process_array(self, event):
-        # Pull the array from the queue
-        self.__array = self.to_ui_message_queue.get(block=False)
-        self.to_ui_message_queue.task_done()
-
+    def process_array(self):
         # Convert the array to PPM format image, so it can be sent to the canvas
+        self.__array = (self.__array * 255.99999).clip(0, 255)
         ppm_header = f'P6 {self.__width} {self.__height} 255 '.encode()
         data = ppm_header + self.__array.astype(np.uint8).tobytes()
         self.__image = PhotoImage(width=self.__width, height=self.__height, data=data, format='PPM')
 
-        # Update Canvas
+        # Update Canvas - if possible
         self.canvas.delete('all')
         self.canvas.create_image(0, 0, anchor=NW, image=self.__image)
