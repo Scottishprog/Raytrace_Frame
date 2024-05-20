@@ -134,3 +134,5 @@ class Window:
         # Update Canvas - if possible
         self.canvas.delete('all')
         self.canvas.create_image(0, 0, anchor=NW, image=self.__image)
+
+        # TODO (unlikely) Update the UI code so it can handle faster update rates gracefully.
