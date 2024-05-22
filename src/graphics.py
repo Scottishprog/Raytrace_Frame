@@ -83,7 +83,7 @@ class Window:
         self.tv.heading(2, text='ID')
         self.tv.column("#0", width=300)
         self.tv.column(1, width=110, anchor='center')
-        self.tv.column(2, width=150)
+        self.tv.column(2, width=175)
 
         for line in data:
             self.tv.insert('', 'end', text=line[0], values=line[1])
