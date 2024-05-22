@@ -131,15 +131,14 @@ def surface_norm(height, width, working_array, parent_thread):
     def hit_sphere(center, radius, ray):
         oc = center - ray.origin
         a = np.dot(ray.direction, ray.direction)
-        b = -2.0 * np.dot(ray.direction, oc)
+        h = np.dot(ray.direction, oc)
         c = np.dot(oc, oc) - radius * radius
-        discriminant = b * b - 4 * a * c
+        discriminant = h * h - a * c
 
         if discriminant < 0:
             return -1.0
         else:
-            return (-b - math.sqrt(discriminant)) / (2 * a)
-        return discriminant >= 0
+            return (h - math.sqrt(discriminant)) / a
 
     def ray_color(ray):
         t = hit_sphere(np.array([0, 0, -1]), 0.5, ray)
