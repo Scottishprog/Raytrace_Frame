@@ -34,17 +34,16 @@ def hello_world(height, width, working_array, parent_thread):
 
 @my_add_world(["First Ray Trace", '4.2 '])
 def first_raytrace(height, width, working_array, parent_thread):
-
     def ray_color(ray):
         unit_direction = unit_vector(ray.direction)
-        a = 0.5*(unit_direction[1] + 1.0)
-        return (1.0 - a)*np.array([1.0, 1.0, 1.0]) + a*np.array([0.5, 0.7, 1.0])
+        a = 0.5 * (unit_direction[1] + 1.0)
+        return (1.0 - a) * np.array([1.0, 1.0, 1.0]) + a * np.array([0.5, 0.7, 1.0])
 
     # Camera
     focal_length = 1.0
     viewport_height = 2.0
-    viewport_width = viewport_height * (width/height)
-    camera_center = np.array([0,0,0])
+    viewport_width = viewport_height * (width / height)
+    camera_center = np.array([0, 0, 0])
 
     # Calculate vectors on the vertical and horizontal viewport edges.
     viewport_u = np.array([viewport_width, 0, 0])
@@ -57,13 +56,14 @@ def first_raytrace(height, width, working_array, parent_thread):
     print(f'pixel_delta_u: {pixel_delta_u}, pixel_delta_v: {pixel_delta_v}')
 
     # Calculate the upper left corner pixel location
-    viewport_upper_left = camera_center - np.array([0,0, focal_length]) - viewport_u/2 - viewport_v/2
-    pixel00_loc = viewport_upper_left + .5*(pixel_delta_u+pixel_delta_v)
+    viewport_upper_left = camera_center - np.array([0, 0, focal_length]) - viewport_u / 2 - viewport_v / 2
+    pixel00_loc = viewport_upper_left + .5 * (pixel_delta_u + pixel_delta_v)
     print(f'pixel00_loc: {pixel00_loc}, viewport_upper_left: {viewport_upper_left}')
 
     for i in range(0, height):
+        parent_thread.send_message_to_ui(ToUiMessage(f'Scanlines remaining: {height - i}'))
         for j in range(0, width):
-            pixel_center = pixel00_loc + (i*pixel_delta_u) + (j*pixel_delta_v)
+            pixel_center = pixel00_loc + (j * pixel_delta_u) + (i * pixel_delta_v)
             ray_direction = pixel_center - camera_center
             r = Ray(camera_center, ray_direction)
 
@@ -71,3 +71,53 @@ def first_raytrace(height, width, working_array, parent_thread):
             working_array[i, j] = color
     return working_array
 
+
+@my_add_world(["Ray Trace w/ Sphere", '5.2 '])
+def red_sphere(height, width, working_array, parent_thread):
+    def hit_sphere(center, radius, ray):
+        oc = center - ray.origin
+        a = np.dot(ray.direction, ray.direction)
+        b = -2.0 * np.dot(ray.direction, oc)
+        c = np.dot(oc, oc) - radius * radius
+        discriminant = b * b - 4 * a * c
+        return discriminant >= 0
+
+    def ray_color(ray):
+        if hit_sphere(np.array([0, 0, -1]), 0.5, ray):
+            return np.array([1, 0, 0])
+
+        unit_direction = unit_vector(ray.direction)
+        a = 0.5 * (unit_direction[1] + 1.0)
+        return (1.0 - a) * np.array([1.0, 1.0, 1.0]) + a * np.array([0.5, 0.7, 1.0])
+
+    # Camera
+    focal_length = 1.0
+    viewport_height = 2.0
+    viewport_width = viewport_height * (width / height)
+    camera_center = np.array([0, 0, 0])
+
+    # Calculate vectors on the vertical and horizontal viewport edges.
+    viewport_u = np.array([viewport_width, 0, 0])
+    viewport_v = np.array([0, -viewport_height, 0])
+    print(f'viewport_u: {viewport_u}, viewport_v: {viewport_v}')
+
+    # Calculate horizontal and vertical delta vectors from pixel to pixel
+    pixel_delta_u = viewport_u / width
+    pixel_delta_v = viewport_v / height
+    print(f'pixel_delta_u: {pixel_delta_u}, pixel_delta_v: {pixel_delta_v}')
+
+    # Calculate the upper left corner pixel location
+    viewport_upper_left = camera_center - np.array([0, 0, focal_length]) - viewport_u / 2 - viewport_v / 2
+    pixel00_loc = viewport_upper_left + .5 * (pixel_delta_u + pixel_delta_v)
+    print(f'pixel00_loc: {pixel00_loc}, viewport_upper_left: {viewport_upper_left}')
+
+    for i in range(0, height):
+        parent_thread.send_message_to_ui(ToUiMessage(f'Scanlines remaining: {height - i}'))
+        for j in range(0, width):
+            pixel_center = pixel00_loc + (j * pixel_delta_u) + (i * pixel_delta_v)
+            ray_direction = pixel_center - camera_center
+            r = Ray(camera_center, ray_direction)
+
+            color = ray_color(r)
+            working_array[i, j] = color
+    return working_array
