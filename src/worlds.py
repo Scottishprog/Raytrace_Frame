@@ -1,10 +1,7 @@
-import time
-
 import numpy as np
 from ray import (Ray, unit_vector)
 from messages import ToUiMessage
 import math
-import time
 
 world_list = {}
 tree_view_list = []
