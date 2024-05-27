@@ -4,7 +4,7 @@ import math
 
 
 class Sphere(HittableObject):
-    def __init__(self, center, radius):
+    def __init__(self, center: np.array, radius):
         super().__init__()
         self.center = center
         self.radius = radius
