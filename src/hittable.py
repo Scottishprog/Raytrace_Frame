@@ -1,4 +1,5 @@
 import numpy as np
+from ray import Ray
 
 
 class HitRecord:
@@ -8,7 +9,7 @@ class HitRecord:
         self.t = t
         self.front_face = front_face
 
-    def set_face_normal(self, ray, outward_normal):
+    def set_face_normal(self, ray: Ray, outward_normal: Ray):
         # Sets the hit record normal vector.
         # NOTE: the parameter 'outward_normal' is assumed to have unit length.
 
@@ -23,7 +24,7 @@ class HittableObject:
     def __init__(self):
         pass
 
-    def hit(self, ray, ray_tmin, ray_tmax, hit_record):
+    def hit(self, ray: Ray, ray_tmin, ray_tmax, hit_record):
         return False
 
 
@@ -38,7 +39,7 @@ class HittableObjectList(HittableObject):
     def add(self, hittable_object: HittableObject):
         self.__objects.append(hittable_object)
 
-    def hit(self, ray, ray_tmin, ray_tmax, hit_record):
+    def hit(self, ray: Ray, ray_tmin, ray_tmax, hit_record):
         temp_hit_record = HitRecord()
         hit_anything = False
         closest_so_far = ray_tmax

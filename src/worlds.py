@@ -198,8 +198,8 @@ def mult_objects(height, width, working_array, parent_thread):
 
     # World
     world = HittableObjectList()
-    world.add(Sphere(np.array([0, 0, -1]), .05))
-    world.add(Sphere(np.array([0, -100, -1]), 100))
+    world.add(Sphere(np.array([0, 0, -1]), 0.5))
+    world.add(Sphere(np.array([0, -100.5, -1]), 100))
 
     # Camera
     focal_length = 1.0
