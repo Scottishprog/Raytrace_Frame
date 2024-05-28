@@ -1,5 +1,6 @@
 import numpy as np
 from ray import Ray
+from utility import Interval
 
 
 class HitRecord:
@@ -27,6 +28,9 @@ class HittableObject:
     def hit(self, ray: Ray, ray_tmin, ray_tmax, hit_record):
         return False
 
+    def hit_interval(self, ray: Ray, ray_t: Interval, hit_record: HitRecord):
+        return False
+
 
 class HittableObjectList(HittableObject):
     def __init__(self):
@@ -45,6 +49,18 @@ class HittableObjectList(HittableObject):
         closest_so_far = ray_tmax
         for hittable_object in self.__objects:
             if hittable_object.hit(ray, ray_tmin, closest_so_far, hit_record):
+                hit_anything = True
+                closest_so_far = hit_record.t
+                hit_record = temp_hit_record
+
+        return hit_anything
+
+    def hit_interval(self, ray: Ray, ray_t: Interval, hit_record: HitRecord):
+        temp_hit_record = HitRecord()
+        hit_anything = False
+        closest_so_far = ray_t.max
+        for hittable_object in self.__objects:
+            if hittable_object.hit(ray, ray_t.min, closest_so_far, hit_record):
                 hit_anything = True
                 closest_so_far = hit_record.t
                 hit_record = temp_hit_record
