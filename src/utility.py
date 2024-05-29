@@ -28,3 +28,6 @@ def empty_interval():
 
 def world_interval():
     return Interval(-infinity, infinity)
+
+# For random number in [0,1) use random() for a range a,b use random(a,b)
+
