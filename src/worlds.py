@@ -235,7 +235,7 @@ def mult_objects(height, width, working_array, parent_thread):
     return working_array
 
 
-@my_add_world(["Antialiasing w/ Multisampling", '6.7 '])
+@my_add_world(["Antialiasing w/ Multisampling", '8.2 '])
 def antialiasing(height, width, working_array, parent_thread):
 
 
@@ -245,7 +245,7 @@ def antialiasing(height, width, working_array, parent_thread):
     world.add(Sphere(np.array([0, -100.5, -1]), 100))
 
     cam = Camera(world, height, width, parent_thread)
-    return cam.render(working_array)
+    return cam.render(working_array, 7, 8)
 
 
 
