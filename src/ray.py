@@ -9,7 +9,7 @@ def unit_vector(vector):
 
 
 class Ray:
-    def __init__(self, origin, direction): # Both inputs are size 3 vectors.
+    def __init__(self, origin, direction):  # Both inputs are size 3 vectors.
         self.origin = origin
         self.direction = direction
 

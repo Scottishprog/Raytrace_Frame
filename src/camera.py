@@ -2,16 +2,17 @@ from random import random
 from hittable import (HitRecord, HittableObjectList)
 from ray import (Ray, unit_vector)
 from src.messages import ToUiMessage
-from utility import (infinity, Interval)
+from utility import (infinity, Interval, random_unit_vector)
 import numpy as np
 
 
 class Camera:
-    def __init__(self, world, height, width, parent_thread):
+    def __init__(self, world, height, width, parent_thread, max_depth=10):
         self.world = world
         self.height = height
         self.width = width
         self.parent_thread = parent_thread
+        self.max_depth = max_depth
         self.camera_center = None
         self.pixel00_loc = None
         self.pixel_delta_u = None
@@ -49,7 +50,8 @@ class Camera:
         # Construct a camera ray originating from the origin and directed at randomly sampled
         # point around the pixel location i, j.
         offset = self.sample_square()
-        pixel_sample = self.pixel00_loc + ((i + offset[0]) * self.pixel_delta_u) + ((j+ + offset[1]) * self.pixel_delta_v)
+        pixel_sample = (self.pixel00_loc + ((i + offset[0]) * self.pixel_delta_u) +
+                        ((j + offset[1]) * self.pixel_delta_v))
         ray_origin = self.camera_center
         ray_direction = pixel_sample - ray_origin
         return Ray(ray_origin, ray_direction)
@@ -59,6 +61,21 @@ class Camera:
         if local_world.hit_interval(ray, Interval(0, infinity), hit_record):
             return 0.5 * (hit_record.normal + np.array([1, 1, 1]))
 
+        unit_direction = unit_vector(ray.direction)
+        a = 0.5 * (unit_direction[1] + 1.0)
+        return (1.0 - a) * np.array([1.0, 1.0, 1.0]) + a * np.array([0.5, 0.7, 1.0])
+
+    def ray_color_lambertain(self, ray: Ray, max_depth, local_world: HittableObjectList):
+        # If recursion limit hit, return no color.
+        if max_depth <= 0:
+            return np.zeros(3)
+
+        hit_record = HitRecord()
+        if local_world.hit_interval(ray, Interval(0.001, infinity), hit_record):
+            direction = hit_record.normal + random_unit_vector()
+            return 0.5 * self.ray_color_lambertain(Ray(hit_record.point, direction), max_depth-1, local_world)
+
+        # Blue Background
         unit_direction = unit_vector(ray.direction)
         a = 0.5 * (unit_direction[1] + 1.0)
         return (1.0 - a) * np.array([1.0, 1.0, 1.0]) + a * np.array([0.5, 0.7, 1.0])
@@ -80,5 +97,25 @@ class Camera:
                     pixel_center = self.pixel00_loc + (i * self.pixel_delta_u) + (j * self.pixel_delta_v)
                     ray_direction = pixel_center - self.camera_center
                     r = Ray(self.camera_center, ray_direction)
-                    working_array[j,i] = self.ray_color(r, self.world)
+                    working_array[j, i] = self.ray_color(r, self.world)
+        return working_array
+
+    def render_lambertain(self, working_array, samples_per_pixel=1, update_freq=10):
+        pixel_samples_scale = 1.0/samples_per_pixel
+        for j in range(0, self.height):
+            if j % update_freq == 0:
+                self.parent_thread.send_message_to_ui(ToUiMessage(
+                    f'Scanlines remaining: {self.height - j}', working_array))
+            for i in range(0, self.width):
+                if samples_per_pixel > 1:
+                    pixel_color = np.zeros(3)
+                    for k in range(0, samples_per_pixel):
+                        r = self.get_ray(i, j)
+                        pixel_color += self.ray_color_lambertain(r, self.max_depth, self.world)
+                    working_array[j, i] = pixel_color * pixel_samples_scale
+                else:
+                    pixel_center = self.pixel00_loc + (i * self.pixel_delta_u) + (j * self.pixel_delta_v)
+                    ray_direction = pixel_center - self.camera_center
+                    r = Ray(self.camera_center, ray_direction)
+                    working_array[j, i] = self.ray_color_lambertain(r, self.max_depth, self.world)
         return working_array

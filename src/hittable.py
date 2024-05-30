@@ -58,9 +58,9 @@ class HittableObjectList(HittableObject):
     def hit_interval(self, ray: Ray, ray_t: Interval, hit_record: HitRecord):
         temp_hit_record = HitRecord()
         hit_anything = False
-        closest_so_far = ray_t.max
+        closest_so_far = ray_t.i_max
         for hittable_object in self.__objects:
-            if hittable_object.hit(ray, ray_t.min, closest_so_far, hit_record):
+            if hittable_object.hit(ray, ray_t.i_min, closest_so_far, hit_record):
                 hit_anything = True
                 closest_so_far = hit_record.t
                 hit_record = temp_hit_record

@@ -248,5 +248,15 @@ def antialiasing(height, width, working_array, parent_thread):
     return cam.render(working_array, 7, 8)
 
 
+@my_add_world(["Lambertain Reflection", '9.6 '])
+def lambertain(height, width, working_array, parent_thread):
 
+
+    # World
+    world = HittableObjectList()
+    world.add(Sphere(np.array([0, 0, -1]), 0.5))
+    world.add(Sphere(np.array([0, -100.5, -1]), 100))
+
+    cam = Camera(world, height, width, parent_thread, 50)
+    return cam.render_lambertain(working_array, 10, 50)
 
